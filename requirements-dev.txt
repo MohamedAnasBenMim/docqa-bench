@@ -1,0 +1,5 @@
+-r requirements.txt
+pytest>=8.0
+ruff>=0.4
+# Optionnel, pour les vrais modèles d'embeddings et de reranking :
+# sentence-transformers>=3.0

@@ -1,0 +1,25 @@
+{"id": "q01", "type": "rag", "question": "Quel est le chiffre d'affaires consolidé de Nordelec en 2024 ?", "facts": ["412"], "gold": ["nordelec_rapport_2024#p1"]}
+{"id": "q02", "type": "rag", "question": "Quelle est la marge d'EBITDA en 2025 ?", "facts": ["15,8"], "gold": ["nordelec_rapport_2025#p2"]}
+{"id": "q03", "type": "rag", "question": "Qui est le directeur général de Nordelec ?", "facts": ["julien marchetti"], "gold": ["nordelec_rapport_2024#p1", "nordelec_rapport_2025#p1"]}
+{"id": "q04", "type": "rag", "question": "Combien d'ingénieurs compte le centre de R&D de Grenoble fin 2025 ?", "facts": ["210"], "gold": ["nordelec_rapport_2025#p3"]}
+{"id": "q05", "type": "rag", "question": "Où sera ouvert le cinquième site industriel ?", "facts": ["valence"], "gold": ["nordelec_rapport_2025#p1"]}
+{"id": "q06", "type": "rag", "question": "Que fait le programme BatterIA ?", "facts": ["degradation"], "gold": ["nordelec_rapport_2024#p4", "nordelec_rapport_2025#p4"]}
+{"id": "q07", "type": "rag", "question": "Sur combien de batteries le modèle BatterIA est-il déployé ?", "facts": ["12 000"], "gold": ["nordelec_rapport_2025#p4"]}
+{"id": "q08", "type": "rag", "question": "Pourquoi la dette nette a-t-elle augmenté en 2025 ?", "facts": ["valence"], "gold": ["nordelec_rapport_2025#p2"]}
+{"id": "q09", "type": "rag", "question": "Qui préside le conseil d'administration ?", "facts": ["helene garnier"], "gold": ["nordelec_gouvernance_risques#p1"]}
+{"id": "q10", "type": "rag", "question": "Combien d'administrateurs indépendants siègent au conseil ?", "facts": ["5"], "gold": ["nordelec_gouvernance_risques#p1"]}
+{"id": "q11", "type": "rag", "question": "Quel est le principal facteur de risque identifié ?", "facts": ["lithium"], "gold": ["nordelec_gouvernance_risques#p2"]}
+{"id": "q12", "type": "rag", "question": "Quelle part de l'exposition en dollars est couverte pour 2026 ?", "facts": ["60"], "gold": ["nordelec_gouvernance_risques#p2"]}
+{"id": "q13", "type": "rag", "question": "Quel incident de cybersécurité a eu lieu en 2025 ?", "facts": ["rancongiciel"], "gold": ["nordelec_gouvernance_risques#p3"]}
+{"id": "q14", "type": "rag", "question": "Quelle certification de sécurité le groupe a-t-il obtenue ?", "facts": ["iso 27001"], "gold": ["nordelec_gouvernance_risques#p3"]}
+{"id": "q15", "type": "rag", "question": "Combien de brevets ont été déposés en 2024 ?", "facts": ["trois"], "gold": ["nordelec_rapport_2024#p4"]}
+{"id": "q16", "type": "rag", "question": "Quels sont les sites industriels du groupe en 2024 ?", "facts": ["lille", "lyon", "grenoble", "porto"], "gold": ["nordelec_rapport_2024#p3"]}
+{"id": "q17", "type": "rag", "question": "Combien de fois le comité d'audit s'est-il réuni en 2025 ?", "facts": ["6"], "gold": ["nordelec_gouvernance_risques#p1"]}
+{"id": "q18", "type": "rag", "question": "Quelle part du chiffre d'affaires représente la division Stockage en 2025 ?", "facts": ["44"], "gold": ["nordelec_rapport_2025#p1"]}
+{"id": "q19", "type": "sql", "question": "Quelle est l'évolution du chiffre d'affaires entre 2023 et 2025 ?", "facts": ["20,4"], "gold": ["sql:financials"]}
+{"id": "q20", "type": "sql", "question": "Quel est le résultat net moyen sur la période ?", "facts": ["23,33"], "gold": ["sql:financials"]}
+{"id": "q21", "type": "sql", "question": "Quelle est la progression de l'effectif entre 2024 et 2025 ?", "facts": ["10,7"], "gold": ["sql:financials"]}
+{"id": "q22", "type": "sql", "question": "Quel est le total des dividendes versés par action de 2023 à 2025 ?", "facts": ["1,35"], "gold": ["sql:financials"]}
+{"id": "q23", "type": "unanswerable", "question": "Quel est le salaire du directeur général ?", "facts": [], "gold": []}
+{"id": "q24", "type": "unanswerable", "question": "Nordelec est-elle cotée au Nasdaq ?", "facts": [], "gold": []}
+{"id": "q25", "type": "unanswerable", "question": "Quelle est la part de marché de Nordelec en Allemagne ?", "facts": [], "gold": []}

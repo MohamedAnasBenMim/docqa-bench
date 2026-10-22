@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocQA-Bench</title>
+<style>
+  :root { --bg:#f7f7f5; --fg:#1d1d1f; --muted:#6b6b6b; --card:#fff; --accent:#1419aa; --line:#e3e3e0; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#141416; --fg:#eee; --muted:#9a9a9a; --card:#1e1e22; --accent:#8a8fff; --line:#2c2c31; } }
+  body { margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  main { max-width: 820px; margin: 0 auto; padding: 32px 16px; }
+  h1 { margin: 0 0 4px; font-size: 1.6rem; } p.sub { color: var(--muted); margin: 0 0 24px; }
+  form { display:flex; gap:8px; flex-wrap: wrap; }
+  input { flex: 1 1 380px; padding: 12px; border:1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--fg); font-size: 1rem; }
+  select, button { padding: 12px; border-radius: 8px; border:1px solid var(--line); background: var(--card); color: var(--fg); }
+  button { background: var(--accent); color: #fff; border: none; cursor: pointer; }
+  .card { background: var(--card); border:1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 20px; }
+  .tag { display:inline-block; font-size:.75rem; padding:2px 8px; border-radius: 99px; border:1px solid var(--line); color: var(--muted); margin-right: 6px; }
+  .p { border-top:1px solid var(--line); padding: 10px 0; font-size: .9rem; } .p b { color: var(--accent); }
+  code { font-size:.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DocQA-Bench</h1>
+  <p class="sub">Questions sur des documents, réponses sourcées. Le routeur choisit entre recherche documentaire et SQL.</p>
+  <form id="f">
+    <input id="q" placeholder="Ex. Quel est l'EBITDA 2025 ? / Évolution du chiffre d'affaires entre 2023 et 2025 ?" required>
+    <select id="v"><option>hybrid_rerank</option><option>hybrid</option><option>naive</option></select>
+    <button>Demander</button>
+  </form>
+  <div id="out"></div>
+</main>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('f').onsubmit = async (e) => {
+  e.preventDefault();
+  const out = document.getElementById('out');
+  out.innerHTML = '<div class="card">Recherche…</div>';
+  try {
+    const r = await fetch('/ask', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({question: q.value, variant: v.value})});
+    const d = await r.json();
+    const passages = (d.passages || []).map(p => p.sql
+      ? `<div class="p"><b>SQL</b> <code>${esc(p.sql)}</code></div>`
+      : `<div class="p"><b>[${esc(p.id)}]</b> ${esc(p.text)}</div>`).join('');
+    out.innerHTML = `<div class="card"><span class="tag">route : ${esc(d.route)}</span><span class="tag">${esc(d.variant)}</span>
+      <p style="font-size:1.05rem">${esc(d.answer)}</p>${passages}</div>`;
+  } catch (err) { out.innerHTML = `<div class="card">Erreur : ${esc(err)}</div>`; }
+};
+</script>
+</body>
+</html>
