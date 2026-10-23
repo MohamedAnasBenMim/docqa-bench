@@ -1,58 +1,58 @@
 # DocQA-Bench
 
-**Un assistant de questions-réponses sur documents, qui cite ses sources et mesure sa propre qualité.**
+**A document question-answering assistant that cites its sources and measures its own quality.**
 
 ![CI](https://github.com/MohamedAnasBenMim/docqa-bench/actions/workflows/ci.yml/badge.svg)
 
-La plupart des démos RAG s'arrêtent à « ça a l'air de marcher ». DocQA-Bench part du principe inverse :
-chaque amélioration du pipeline doit être **mesurée** sur un jeu de questions annotées, et la CI refuse
-toute régression.
+Most RAG demos stop at "it seems to work". DocQA-Bench takes the opposite approach:
+every pipeline improvement must be **measured** against a set of annotated questions, and CI rejects
+any regression.
 
-- **Recherche hybride** : BM25 + embeddings, fusionnés par Reciprocal Rank Fusion, puis **reranking**
-- **Citations vérifiables** : chaque réponse renvoie au document et à la page exacts
-- **Agent routeur RAG / SQL** : les questions chiffrées (évolutions, moyennes, totaux) partent vers une base SQL,
-  avec garde-fous (SELECT uniquement, table autorisée)
-- **Banc d'évaluation** : exactitude, recall@k, exactitude des citations, fidélité, taux d'hallucination, routage, latence
-- **Production** : API FastAPI, interface web, Docker, CI GitHub Actions qui relance l'évaluation à chaque commit
-- **Fonctionne sans clé d'API** (mode extractif hors ligne) ; branchez n'importe quel LLM compatible OpenAI
-  (OpenAI, Mistral, Groq, Ollama en local)
+- **Hybrid retrieval**: BM25 + embeddings, merged with Reciprocal Rank Fusion, followed by **reranking**
+- **Verifiable citations**: every answer points to the exact document and page
+- **RAG / SQL routing agent**: numerical questions (trends, averages, totals) are sent to a SQL database,
+  with guardrails (SELECT only, allow-listed table)
+- **Evaluation bench**: accuracy, recall@k, citation accuracy, faithfulness, hallucination rate, routing, latency
+- **Production setup**: FastAPI API, web interface, Docker, GitHub Actions CI that re-runs the evaluation on every commit
+- **Works without an API key** (offline extractive mode); plug in any OpenAI-compatible LLM
+  (OpenAI, Mistral, Groq, local Ollama)
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    Q[Question] --> R{Agent routeur}
-    R -- chiffres agrégés --> S[Text-to-SQL<br/>+ garde-fous] --> DB[(SQLite)]
-    R -- texte --> H[Recherche hybride<br/>BM25 + dense, RRF]
-    H --> RR[Reranker] --> G[Génération LLM<br/>avec citations]
-    DB --> A[Réponse sourcée]
+    Q[Question] --> R{Routing agent}
+    R -- aggregated figures --> S[Text-to-SQL<br/>+ guardrails] --> DB[(SQLite)]
+    R -- text --> H[Hybrid retrieval<br/>BM25 + dense, RRF]
+    H --> RR[Reranker] --> G[LLM generation<br/>with citations]
+    DB --> A[Sourced answer]
     G --> A
-    A -. jeu annoté .-> E[Banc d'évaluation<br/>CI GitHub Actions]
+    A -. annotated set .-> E[Evaluation bench<br/>GitHub Actions CI]
 ```
 
-## Démarrage rapide
+## Quick start
 
 ```bash
 git clone https://github.com/MohamedAnasBenMim/docqa-bench.git && cd docqa-bench
-docker compose up --build          # puis ouvrir http://localhost:8000
+docker compose up --build          # then open http://localhost:8000
 ```
 
-Sans Docker :
+Without Docker:
 
 ```bash
 pip install -r requirements-dev.txt
-uvicorn docqa.api:app --reload     # API + interface sur http://localhost:8000
+uvicorn docqa.api:app --reload     # API + interface at http://localhost:8000
 pytest                             # tests
-python -m eval.run_eval            # évaluation des 3 variantes -> eval/results/results.md
+python -m eval.run_eval            # evaluate the 3 variants -> eval/results/results.md
 ```
 
-Avec un LLM (exemple Mistral) :
+With an LLM (Mistral example):
 
 ```bash
 export LLM_API_KEY=...  LLM_BASE_URL=https://api.mistral.ai/v1  LLM_MODEL=mistral-small-latest
 ```
 
-Avec de vrais modèles d'embeddings et de reranking :
+With real embedding and reranking models:
 
 ```bash
 pip install sentence-transformers
@@ -66,59 +66,59 @@ curl -X POST localhost:8000/ask -H 'Content-Type: application/json' \
      -d '{"question": "Évolution du chiffre d'"'"'affaires entre 2023 et 2025 ?"}'
 ```
 
-Réponse : `answer`, `citations`, `passages` (avec scores), `route` (`rag` ou `sql`), `variant`.
+Response: `answer`, `citations`, `passages` (with scores), `route` (`rag` or `sql`), `variant`.
 
-## Résultats
+## Results
 
-### Corpus de démonstration (fictif, 25 questions, mode extractif sans LLM)
+### Demo corpus (fictional, 25 questions, extractive mode without an LLM)
 
-Ces chiffres valident le pipeline et servent de référence en CI. Le corpus est volontairement petit :
-les trois variantes y sont presque équivalentes.
+These figures validate the pipeline and serve as the CI baseline. The corpus is deliberately small,
+so the three variants perform almost identically on it.
 
-| Variante | Exactitude | Recall@4 | Citations exactes | Fidélité | Hallucination ↓ | Routage |
+| Variant | Accuracy | Recall@4 | Exact citations | Faithfulness | Hallucination ↓ | Routing |
 |---|---|---|---|---|---|---|
-| naive | 96 % | 100 % | 100 % | 100 % | 33 % | 100 % |
-| hybrid | 96 % | 100 % | 100 % | 100 % | 33 % | 100 % |
-| hybrid_rerank | 96 % | 100 % | 96 % | 100 % | 33 % | 100 % |
+| naive | 96% | 100% | 100% | 100% | 33% | 100% |
+| hybrid | 96% | 100% | 100% | 100% | 33% | 100% |
+| hybrid_rerank | 96% | 100% | 96% | 100% | 33% | 100% |
 
-Le taux d'hallucination de 33 % (1 question sans réponse sur 3) illustre la limite du mode extractif :
-il ne sait pas s'abstenir. C'est exactement ce que le passage à un LLM doit corriger.
+The 33% hallucination rate (1 unanswerable question out of 3) highlights the limitation of extractive mode:
+it cannot abstain. This is exactly what switching to an LLM is meant to fix.
 
-### Corpus réel
+### Real-world corpus
 
-*À compléter* : rapports annuels publics d'entreprises françaises cotées, ~100 questions annotées.
-Voir [`scripts/README.md`](scripts/README.md).
+*To be completed*: public annual reports from French listed companies, ~100 annotated questions.
+See [`scripts/README.md`](scripts/README.md).
 
-## Métriques
+## Metrics
 
-| Métrique | Définition |
+| Metric | Definition |
 |---|---|
-| Exactitude | la réponse contient tous les faits attendus |
-| Recall@k | au moins un passage de la bonne page figure dans les k passages retrouvés |
-| Citations exactes | la réponse cite au moins une page attendue, et aucune page hors sujet |
-| Fidélité | chaque nombre de la réponse figure dans les passages cités |
-| Hallucination | réponse donnée à une question dont la réponse n'est pas dans les documents |
-| Routage | la question est envoyée au bon outil (RAG ou SQL) |
+| Accuracy | the answer contains all expected facts |
+| Recall@k | at least one passage from the correct page appears in the top-k retrieved passages |
+| Exact citations | the answer cites at least one expected page and no irrelevant page |
+| Faithfulness | every number in the answer appears in the cited passages |
+| Hallucination | an answer is given to a question whose answer is not in the documents |
+| Routing | the question is sent to the right tool (RAG or SQL) |
 
-## Structure
+## Project structure
 
 ```
-docqa/        ingestion, recherche, reranking, génération, SQL, agent, API
-eval/         questions annotées, métriques, script d'évaluation
-data/sample/  corpus de démonstration fictif + données financières
-tests/        tests unitaires et d'API
+docqa/        ingestion, retrieval, reranking, generation, SQL, agent, API
+eval/         annotated questions, metrics, evaluation script
+data/sample/  fictional demo corpus + financial data
+tests/        unit and API tests
 ```
 
-## Feuille de route
+## Roadmap
 
-- [x] Recherche BM25, dense et hybride (RRF) + reranking
-- [x] Citations au niveau page, agent routeur RAG/SQL avec garde-fous
-- [x] Banc d'évaluation + seuil de non-régression en CI
-- [ ] Corpus réel (rapports annuels publics) et ~100 questions annotées
-- [ ] Comparaison chiffrée des variantes avec `multilingual-e5` et `bge-reranker`
-- [ ] Juge LLM pour la fidélité des réponses en langage naturel
-- [ ] Découpage hiérarchique (sections → paragraphes) et OCR pour les PDF scannés
+- [x] BM25, dense and hybrid (RRF) retrieval + reranking
+- [x] Page-level citations, RAG/SQL routing agent with guardrails
+- [x] Evaluation bench + non-regression threshold in CI
+- [ ] Real-world corpus (public annual reports) and ~100 annotated questions
+- [ ] Quantitative comparison of variants with `multilingual-e5` and `bge-reranker`
+- [ ] LLM-as-a-judge for faithfulness of natural-language answers
+- [ ] Hierarchical chunking (sections → paragraphs) and OCR for scanned PDFs
 
-## Licence
+## License
 
 MIT
